@@ -1,17 +1,43 @@
 $(document).ready(function () {
-    var amenitiesIDs = {};
+    const HOST = 'http://127.0.0.1:5001';
+    const amenities = {};
+    const cities = {};
+    const states = {};
 
     $('input[type="checkbox"]').change(function () {
-        if ($(this).is(':checked')) {
-            amenitiesID[$(this).attr('data-id')] = $(this).attr('data-name');
-        } else {
-            delete amenitiesID[$(this).attr('data-id')];
-        }
-        $('.amenities H4').text(Object.values(amenitiesID).join(', '));
+      const el = e.target;
+      let tt;
+
+      // let me try and use the switch-case to make it more dynamic
+      switch (el.id) {
+        case "state_filter":
+          tt = states;
+          break;
+        case "city_filter":
+          tt = cities;
+          break;
+        case "amenity_filter":
+          tt = amenities;
+          break;
+      }
+      // check if the checkbox is checked
+      if (el.checked) {
+        tt[el.dataset.name] = el.dataset.id;
+      } else {
+        delete tt[el.dataset.name];
+      }
+      // if id is amenity_filter
+      if (el.id === "amenity_filter") {
+        $(".amenities h4").text(Object.keys(amenities).sort().join(", "));
+      } else {
+        $(".locations h4").text(
+          Object.keys(Object.assign({}, states, cities)).sort().join(", ")
+        );
+      }
     });
 
     function updateApiStatus() {
-        $.get('http://127.0.0.1:5001/api/v1/status/', function (data) {
+        $.get(`${HOST}/api/v1/status/`, function (data) {
             if (data.status === "OK") {
                 $('#api_status').addClass('available');
             } else {
@@ -21,7 +47,7 @@ $(document).ready(function () {
     }
 
     $.ajax({
-        url: 'ttp://127.0.0.1:5001/api/v1/places_search/',
+        url: `${HOST}/api/v1/places_search/`,
         type: 'POST',
         contentType: 'application/json',
         data: JSON.stringify({}),
@@ -57,9 +83,10 @@ $(document).ready(function () {
         }
     });
 
+
     function searchPlace() {
       $.post({
-        url: 'http://127.0.0.1:5001/api/v1/places_search',
+        url: `${HOST}/api/v1/places_search`,
         data: JSON.stringify({
         amenities: Object.values(amenities),
         states: Object.values(states),
